@@ -4,6 +4,7 @@
 
 const uint8_t buttonPins[] = {4, 16, 12, 14};
 const uint8_t ledPins[] = {0, 17, 13, 27};
+const uint8_t buzzerPin = 18;
 const int POSITIONS_QUANTITY = 4;
 int buttonPressed = -1;
 int currentPos = 0;
@@ -51,6 +52,7 @@ void resetLeds() {
 void setup()
 {
   Serial.begin(9600);
+  pinMode(buzzerPin, OUTPUT);
   for (int i = 0; i < 4; i++) {
     pinMode(ledPins[i], OUTPUT);
     pinMode(buttonPins[i], INPUT_PULLUP);
@@ -68,7 +70,10 @@ void loop() {
   resetLeds();
   if(buttonPressed == currentPos){
     Serial.print("Correct");
+    tone(buzzerPin, 1000, waitTime * 100);
   }else{
     Serial.print("Incorrect");
+    tone(buzzerPin, 250, waitTime * 100);
   }
+  buttonPressed = -1;
 }
