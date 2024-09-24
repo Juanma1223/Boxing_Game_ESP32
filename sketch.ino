@@ -9,6 +9,9 @@ int buttonPressed = -1;
 int currentPos = 0;
 // This is the time player has to punch the chosen position
 int waitTime = 2;
+bool usePattern = true;
+int pattern[] = {0, 1, 2};
+int currentPatternPos = 0;
 
 void IRAM_ATTR pushButton0() {
   buttonPressed = 0;
@@ -37,10 +40,21 @@ int randomPosition() {
   return (pos);
 }
 
-void blink() {
+void blinkRandom() {
   currentPos = randomPosition();
   digitalWrite(ledPins[currentPos], HIGH);
 }
+
+void blink() {
+  digitalWrite(ledPins[pattern[currentPatternPos]], HIGH);
+  int patternLength = sizeof(pattern) / sizeof(int);
+  currentPatternPos++;
+  
+  if (currentPatternPos >= patternLength) {
+    currentPatternPos = 0;
+  }
+}
+
 
 void resetLeds() {
   for (int i = 0; i < POSITIONS_QUANTITY; i++) {
@@ -63,12 +77,18 @@ void setup()
 }
 
 void loop() {
-  blink();
-  delay(waitTime * 1000);
-  resetLeds();
-  if(buttonPressed == currentPos){
+  if (!usePattern) {
+    blinkRandom();
+    delay(waitTime * 1000);
+    resetLeds();
+  } else {
+    blink();
+    delay(waitTime * 1000);
+    resetLeds();
+  }
+  if (buttonPressed == currentPos) {
     Serial.print("Correct");
-  }else{
+  } else {
     Serial.print("Incorrect");
   }
 }
