@@ -1,6 +1,8 @@
 [config]
 # models
 model="'ollama/llama3'"
+model_turbo = "ollama/llama3"
+fallback_models=["ollama/llama3"]
 # CLI
 git_provider="github"
 publish_output=true
