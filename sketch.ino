@@ -12,6 +12,9 @@ int buttonPressed = -1;
 int currentPos = 0;
 // This is the time player has to punch the chosen position
 int waitTime = 2;
+bool usePattern = true;
+int pattern[] = {0, 1, 2};
+int currentPatternPos = 0;
 
 const char *ssid = "Boxing game";
 const char *password = "123456789";
@@ -51,8 +54,12 @@ int randomPosition()
   return (pos);
 }
 
+<<<<<<< HEAD
 void blink()
 {
+=======
+void blinkRandom() {
+>>>>>>> dd7d08fdf5a434d79b15d402f2cdb1dbbc97dc4e
   currentPos = randomPosition();
   digitalWrite(ledPins[currentPos], HIGH);
 }
@@ -123,6 +130,7 @@ void setup()
   server.begin();
 }
 
+<<<<<<< HEAD
 void loop()
 {
   blink();
@@ -134,6 +142,21 @@ void loop()
   }
   else
   {
+=======
+void loop() {
+  if (!usePattern) {
+    blinkRandom();
+    delay(waitTime * 1000);
+    resetLeds();
+  } else {
+    blink();
+    delay(waitTime * 1000);
+    resetLeds();
+  }
+  if (buttonPressed == currentPos) {
+    Serial.print("Correct");
+  } else {
+>>>>>>> dd7d08fdf5a434d79b15d402f2cdb1dbbc97dc4e
     Serial.print("Incorrect");
   }
 }
