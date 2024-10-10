@@ -13,8 +13,9 @@ int currentPos = 0;
 // This is the time player has to punch the chosen position
 int waitTime = 2;
 bool usePattern = true;
-int pattern[] = { 0, 1, 2 };
+int pattern[] = { 0, 1, 2, -1, -1, -1, -1, -1, -1, -1 };
 int currentPatternPos = 0;
+bool reloadingPattern = false;
 
 const char *ssid = "Boxing game";
 const char *password = "123456789";
@@ -37,6 +38,21 @@ void IRAM_ATTR pushButton3() {
   buttonPressed = 3;
 }
 
+void decodePattern(String input) {
+  int start = 1;
+  int index = 0;
+
+  for (int i = 1; i < input.length(); i++) {
+    if (input[i] == ',' || i == (input.length() - 1)) {
+      String numberStr = input.substring(start, i);
+      Serial.println(numberStr);
+      pattern[index] = numberStr.toInt();
+      index++;
+      start = i + 1;
+    }
+  }
+}
+
 // Return a random position for the user to push
 int randomPosition() {
   int buf = 0;
@@ -51,6 +67,18 @@ int randomPosition() {
 void blinkRandom() {
   currentPos = randomPosition();
   digitalWrite(ledPins[currentPos], HIGH);
+}
+
+void blink() {
+  if (!reloadingPattern) {
+    digitalWrite(ledPins[pattern[currentPatternPos]], HIGH);
+    Serial.println(pattern[currentPatternPos]);
+    currentPatternPos++;
+    // -1 represents the end of the pattern too
+    if (currentPatternPos >= (sizeof(pattern) / sizeof(int)) || pattern[currentPatternPos] == -1) {
+      currentPatternPos = 0;
+    }
+  }
 }
 
 void resetLeds() {
@@ -78,6 +106,7 @@ void setup() {
 
   server.on(
     "/combination", HTTP_POST, [](AsyncWebServerRequest *request) {}, nullptr, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+      reloadingPattern = true;
       StaticJsonDocument<200> jsonDoc;
       DeserializationError error = deserializeJson(jsonDoc, data);
 
@@ -86,13 +115,11 @@ void setup() {
         return;
       }
 
-      String response = "Received data:\n";
-      response += jsonDoc["param1"].as<String>();
-      response += "\n";
-      response += jsonDoc["param2"].as<String>();
+      String response = jsonDoc["value"].as<String>();
+      decodePattern(response);
 
-      Serial.println(response);
       request->send(200, "application/json", "{\"status\":\"success\"}");
+      reloadingPattern = false;
     });
 
   server.on(
@@ -105,10 +132,12 @@ void setup() {
         return;
       }
 
-      String response = "Received data:\n";
-      response += jsonDoc["value"].as<String>();
+      String response = jsonDoc["value"].as<String>();
+      waitTime = response.toInt();
+      // Values received come from 0 to 100
+      waitTime = waitTime / 10;
 
-      Serial.println(response);
+      Serial.println(waitTime);
       request->send(200, "application/json", "{\"status\":\"success\"}");
     });
 
