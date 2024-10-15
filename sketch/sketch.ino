@@ -42,6 +42,12 @@ void decodePattern(String input) {
   int start = 1;
   int index = 0;
 
+  if(input.length() == 2){
+    usePattern = false;
+  }else{
+    usePattern = true;
+  }
+
   for (int i = 1; i < input.length(); i++) {
     if (input[i] == ',' || i == (input.length() - 1)) {
       String numberStr = input.substring(start, i);
