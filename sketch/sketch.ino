@@ -48,6 +48,7 @@ void decodePattern(String input) {
     usePattern = true;
   }
 
+  Serial.println("Pattern:");
   for (int i = 1; i < input.length(); i++) {
     if (input[i] == ',' || i == (input.length() - 1)) {
       String numberStr = input.substring(start, i);
@@ -78,7 +79,8 @@ void blinkRandom() {
 void blink() {
   if (!reloadingPattern) {
     digitalWrite(ledPins[pattern[currentPatternPos]], HIGH);
-    Serial.println(pattern[currentPatternPos]);
+    //Serial.println(pattern[currentPatternPos]);
+    currentPos=pattern[currentPatternPos];
     currentPatternPos++;
     // -1 represents the end of the pattern too
     if (currentPatternPos >= (sizeof(pattern) / sizeof(int)) || pattern[currentPatternPos] == -1) {
@@ -100,10 +102,10 @@ void setup() {
     pinMode(buttonPins[i], INPUT_PULLUP);
   }
 
-  attachInterrupt(buttonPins[0], pushButton0, RISING);
-  attachInterrupt(buttonPins[1], pushButton1, RISING);
-  attachInterrupt(buttonPins[2], pushButton2, RISING);
-  attachInterrupt(buttonPins[3], pushButton3, RISING);
+  attachInterrupt(buttonPins[0], pushButton0, FALLING);
+  attachInterrupt(buttonPins[1], pushButton1, FALLING);
+  attachInterrupt(buttonPins[2], pushButton2, FALLING);
+  attachInterrupt(buttonPins[3], pushButton3, FALLING);
 
   WiFi.softAP(ssid, password);
   IPAddress IP = WiFi.softAPIP();
@@ -160,9 +162,14 @@ void loop() {
     delay(waitTime * 1000);
     resetLeds();
   }
+  Serial.println("Current Pos: ");
+  Serial.println(currentPos);
+  Serial.println("ButtonPressed");
+  Serial.println(buttonPressed);
   if (buttonPressed == currentPos) {
-    Serial.print("Correct");
+    Serial.println("Correct");
   } else {
-    Serial.print("Incorrect");
+    Serial.println("Incorrect");
   }
+  buttonPressed = -1;
 }
